@@ -3,7 +3,8 @@ static const char *user  = "nobody";
 static const char *group = "nobody";
 
 static const char *colorname[NUMCOLS] = {
-	[INIT] =   "black",     /* after initialization */
+	[BG] =     "black",     /* background */
+	[INIT] =   "black",     /* after initialization: no visible square */
 	[INPUT] =  "#005577",   /* during input */
 	[FAILED] = "#CC3333",   /* wrong password */
 };
@@ -30,3 +31,6 @@ static const Passthrough passthroughs[] = {
 	{ 0,          XF86XK_MonBrightnessUp },
 	{ 0,          XF86XK_MonBrightnessDown },
 };
+
+/* squares: size of the square on each monitor in px */
+static const int squaresize = 50;
