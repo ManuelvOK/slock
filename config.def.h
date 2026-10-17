@@ -17,3 +17,16 @@ static const int controlkeyclear = 0;
 
 /* time in seconds before the monitors are switched off while locked */
 static const int monitortime = 5;
+
+#include <X11/XF86keysym.h>
+
+/* passthrough: keys that still work while locked. They are sent to the
+ * root window, so the window manager (dwm) has to select KeyPressMask there */
+static const Passthrough passthroughs[] = {
+	/* modifier   key */
+	{ 0,          XF86XK_AudioRaiseVolume },
+	{ 0,          XF86XK_AudioLowerVolume },
+	{ 0,          XF86XK_AudioMute },
+	{ 0,          XF86XK_MonBrightnessUp },
+	{ 0,          XF86XK_MonBrightnessDown },
+};
