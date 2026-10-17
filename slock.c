@@ -156,6 +156,9 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 			    IsPFKey(ksym) ||
 			    IsPrivateKeypadKey(ksym))
 				continue;
+			/* control-clear: a modifier key alone changes nothing */
+			if (!controlkeyclear && IsModifierKey(ksym))
+				continue;
 			switch (ksym) {
 			case XK_Return:
 				passwd[len] = '\0';
