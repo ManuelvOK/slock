@@ -129,7 +129,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 {
 	XRRScreenChangeNotifyEvent *rre;
 	char buf[32], passwd[256], *inputhash;
-	int num, screen, running, failure, oldc;
+	int num, screen, running, failure, blank, oldc;
 	unsigned int len, color;
 	KeySym ksym;
 	XEvent ev;
@@ -137,6 +137,7 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 	len = 0;
 	running = 1;
 	failure = 0;
+	blank = 0; /* show INIT on empty input, set by Esc on empty input */
 	oldc = INIT;
 
 	while (running && !XNextEvent(dpy, &ev)) {
@@ -167,10 +168,14 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 					XBell(dpy, 100);
 					failure = 1;
 				}
+				blank = 0;
 				explicit_bzero(&passwd, sizeof(passwd));
 				len = 0;
 				break;
 			case XK_Escape:
+				/* a second Esc, on already empty input, goes back to
+				 * the initial color */
+				blank = !len;
 				explicit_bzero(&passwd, sizeof(passwd));
 				len = 0;
 				break;
@@ -183,13 +188,15 @@ readpw(Display *dpy, struct xrandr *rr, struct lock **locks, int nscreens,
 				    (len + num < sizeof(passwd))) {
 					memcpy(passwd + len, buf, num);
 					len += num;
+					blank = 0;
 				} else if (buf[0] == '\025') { /* ctrl-u clears input */
 					explicit_bzero(&passwd, sizeof(passwd));
 					len = 0;
 				}
 				break;
 			}
-			color = len ? INPUT : ((failure || failonclear) ? FAILED : INIT);
+			color = len ? INPUT :
+			        ((!blank && (failure || failonclear)) ? FAILED : INIT);
 			if (running && oldc != color) {
 				for (screen = 0; screen < nscreens; screen++) {
 					XSetWindowBackground(dpy,
