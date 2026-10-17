@@ -30,6 +30,10 @@ static const Passthrough passthroughs[] = {
 	{ 0,          XF86XK_AudioMute },
 	{ 0,          XF86XK_MonBrightnessUp },
 	{ 0,          XF86XK_MonBrightnessDown },
+	{ 0,          XF86XK_AudioPlay },
+	{ 0,          XF86XK_AudioPause },
+	{ 0,          XF86XK_AudioNext },
+	{ 0,          XF86XK_AudioPrev },
 };
 
 /* squares: size of the square on each monitor in px */
