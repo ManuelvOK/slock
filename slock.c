@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <X11/extensions/Xrandr.h>
+#include <X11/extensions/dpms.h>
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -325,7 +326,9 @@ main(int argc, char **argv) {
 	gid_t dgid;
 	const char *hash;
 	Display *dpy;
-	int s, nlocks, nscreens;
+	int s, nlocks, nscreens, dpmsok;
+	CARD16 power, standby, suspend, off;
+	BOOL dpmsstate;
 
 	if (argc > 1 && !strcmp(argv[1], "-v")) {
 		puts("slock-"VERSION);
@@ -385,8 +388,28 @@ main(int argc, char **argv) {
 	if (nlocks != nscreens)
 		return 1;
 
+	/* dpms: switch the monitors off after monitortime seconds. The screen
+	 * is locked already, so a failure here must not end slock. */
+	dpmsok = DPMSCapable(dpy) && DPMSInfo(dpy, &power, &dpmsstate) &&
+	         DPMSGetTimeouts(dpy, &standby, &suspend, &off);
+	if (dpmsok) {
+		DPMSEnable(dpy);
+		DPMSSetTimeouts(dpy, monitortime, monitortime, monitortime);
+		XSync(dpy, 0);
+	} else {
+		fprintf(stderr, "slock: DPMS not available, monitors stay on\n");
+	}
+
 	/* everything is now blank. Wait for the correct password */
 	readpw(dpy, &rr, locks, nscreens, hash);
+
+	/* dpms: restore the previous settings */
+	if (dpmsok) {
+		DPMSSetTimeouts(dpy, standby, suspend, off);
+		if (!dpmsstate)
+			DPMSDisable(dpy);
+		XSync(dpy, 0);
+	}
 
 	return 0;
 }

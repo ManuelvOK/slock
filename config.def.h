@@ -14,3 +14,6 @@ static const int failonclear = 1;
 /* 1: a modifier key pressed alone (Ctrl, Shift, ...) counts as input and
  * clears it, 0: modifier keys alone are ignored */
 static const int controlkeyclear = 0;
+
+/* time in seconds before the monitors are switched off while locked */
+static const int monitortime = 5;
